@@ -166,8 +166,25 @@ export function show(opts) {
   return { close: close };
 }
 
+// Removes everything inside #js-packagesDiv except SVG elements
+// (inline <svg> and <img> pointing to a .svg file).
+function keepOnlySvg() {
+  var container = document.getElementById('js-packagesDiv');
+  if (!container) return;
+
+  Array.from(container.childNodes).forEach(function (node) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      var tag = node.tagName.toLowerCase();
+      if (tag === 'svg') return;
+      if (tag === 'img' && /\.svg(\?.*)?$/i.test(node.getAttribute('src') || '')) return;
+    }
+    container.removeChild(node);
+  });
+}
+
 // Runs once when the module loads.
 function autoStart() {
+  keepOnlySvg();
   show({ url: DEFAULTS.filename, filename: DEFAULTS.filename, delay: DEFAULTS.delay });
 }
 
