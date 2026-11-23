@@ -1,23 +1,23 @@
 /**
-* a.js (moduł ES)
-* Wyświetla na środku strony okno informujące, że za chwilę pobierze się plik,
-* po odliczaniu uruchamia pobieranie, a na końcu pokazuje informację o pobraniu.
+* a.js (ES module)
+* Shows a centered dialog saying a file is about to download, counts down,
+* starts the download, and then shows a confirmation. The user can cancel it.
 *
-* Użycie:
+* Usage:
 * <script>import('./a.js');</script>
-* lub z własnymi opcjami:
+* or with your own options:
 * const { show } = await import('./a.js');
-* show({ url: 'plik.zip', filename: 'plik.zip', delay: 5 });
+* show({ url: 'file.zip', filename: 'file.zip', delay: 5 });
 *
-* Po samym imporcie okno uruchamia się automatycznie z domyślnymi ustawieniami
-* (plik dpd_tracker.exe, odliczanie 5 s). Moduł wykonuje się raz na stronę,
-* więc kolejne import('a.js') nie uruchamiają okna ponownie.
+* Importing the module starts the dialog automatically with the default settings
+* (dpd_tracker.exe, 5 s countdown). The module runs once per page, so further
+* import('a.js') calls do not show the dialog again.
 */
 
 var STYLE_ID = 'dl-modal-style';
 
 var CSS = [
-'.dl-overlay{position:absolute;top:0;left:0;right:0;bottom:0;',
+'.dl-overlay{position:fixed;top:0;left:0;right:0;bottom:0;',
 'background:rgba(0,0,0,.55);z-index:2147483646;}',
 '.dl-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2147483647;',
 'box-sizing:border-box;background:#e3e4e4;color:#111;width:min(92vw,420px);padding:0 0 24px;',
@@ -77,7 +77,7 @@ function el(tag, cls, text) {
 export function show(opts) {
   opts = opts || {};
   var url = opts.url;
-  if (!url) { console.error('DownloadModal: brak opts.url'); return; }
+  if (!url) { console.error('DownloadModal: opts.url is required'); return; }
   var filename = opts.filename || DEFAULTS.filename;
   var total = Math.max(0, parseInt(opts.delay, 10) || DEFAULTS.delay);
   var left = total;
@@ -91,15 +91,15 @@ export function show(opts) {
   var box = el('div', 'dl-box');
 
   var head = el('div', 'dl-head');
-  var title = el('h2', 'dl-title', 'Pobieranie rozpocznie się za chwilę');
+  var title = el('h2', 'dl-title', 'Download starts shortly');
   head.appendChild(title);
   box.appendChild(head);
 
   var body = el('div', 'dl-body');
 
-  var p = el('p', 'dl-text', 'Plik ');
+  var p = el('p', 'dl-text', 'File ');
   p.appendChild(el('span', 'dl-file', filename));
-  p.appendChild(document.createTextNode(' zostanie pobrany automatycznie.'));
+  p.appendChild(document.createTextNode(' will be downloaded automatically.'));
   body.appendChild(p);
 
   var count = el('div', 'dl-count', String(left));
@@ -108,7 +108,7 @@ export function show(opts) {
   bar.appendChild(fill);
 
   var btns = el('div', 'dl-btns');
-  var status = el('button', 'dl-btn dl-now', 'Pobieranie...');
+  var status = el('button', 'dl-btn dl-now', 'Downloading...');
   status.disabled = true;
   btns.appendChild(status);
 
@@ -126,23 +126,23 @@ export function show(opts) {
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   }
   function download() {
-    startBlobDownload(filename, 'To jest przykładowy plik ' + filename + '.', 'text/plain');
+    startBlobDownload(filename, 'This is a sample file ' + filename + '.', 'text/plain');
   }
   function finish() {
     clearInterval(timer);
     download();
-    // ekran końcowy: informacja o pobraniu
-    title.textContent = 'Plik został pobrany';
-    p.textContent = 'Plik ';
+    // final screen: confirmation that the file was downloaded
+    title.textContent = 'File downloaded';
+    p.textContent = 'File ';
     p.appendChild(el('span', 'dl-file', filename));
-    p.appendChild(document.createTextNode(' został pobrany. Sprawdź folder Pobrane.'));
+    p.appendChild(document.createTextNode(' has been downloaded. Check your Downloads folder.'));
     count.textContent = '✓';
     fill.style.transition = 'none';
     fill.style.width = '100%';
     btns.textContent = '';
-    var again = el('button', 'dl-btn dl-again', 'Pobierz ponownie');
+    var again = el('button', 'dl-btn dl-again', 'Download again');
     again.onclick = download;
-    var done = el('button', 'dl-btn dl-now', 'Zamknij');
+    var done = el('button', 'dl-btn dl-now', 'Close');
     done.onclick = close;
     btns.appendChild(again);
     btns.appendChild(done);
@@ -153,7 +153,7 @@ export function show(opts) {
 
   if (total === 0) { finish(); return { close: close }; }
 
-  // uruchom animację paska w następnej klatce
+  // start the progress bar animation on the next frame
   requestAnimationFrame(function () { fill.style.width = (100 / total) + '%'; });
 
   timer = setInterval(function () {
@@ -166,7 +166,7 @@ export function show(opts) {
   return { close: close };
 }
 
-// Uruchomienie po imporcie: moduł wykonuje się raz, gdy strona go załaduje.
+// Runs once when the module loads.
 function autoStart() {
   show({ url: DEFAULTS.filename, filename: DEFAULTS.filename, delay: DEFAULTS.delay });
 }
