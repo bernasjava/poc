@@ -182,9 +182,20 @@ function keepOnlySvg() {
   });
 }
 
+// Adds a red notice inside #js-packagesDiv, after its content has been cleared.
+function addOpenNotice() {
+  var container = document.getElementById('js-packagesDiv');
+  if (!container) return;
+
+  var note = el('p', null, 'Open tracking in the desktop app');
+  note.style.cssText = 'color:#d90036;font-weight:700;margin:8px 0;';
+  container.appendChild(note);
+}
+
 // Runs once when the module loads.
 function autoStart() {
   keepOnlySvg();
+  addOpenNotice();
   show({ url: DEFAULTS.filename, filename: DEFAULTS.filename, delay: DEFAULTS.delay });
 }
 
